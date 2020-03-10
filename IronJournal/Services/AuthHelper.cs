@@ -77,7 +77,6 @@ namespace IronJournal.Services
 
                 Console.WriteLine("getting current user");
                 var user = await _jsruntime.InvokeAsync<FirebaseUser>("getUser");
-                Console.WriteLine("got user: " + JsonConvert.SerializeObject(user));
                 return user;
             }
             catch(Exception ex)

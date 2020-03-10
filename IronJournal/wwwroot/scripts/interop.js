@@ -80,16 +80,14 @@ window.getUser = function () {
 
 window.getUserIdToken = function (forceRefresh, dotnetCallback) {
   firebase.auth().currentUser.getIdToken(/* forceRefresh */ forceRefresh).then(function (idToken) {
-    console.log("id token: " + idToken);
     dotnetCallback.invokeMethodAsync("onComplete", idToken);
-    // Send token to your backend via HTTPS
-    // ...
   }).catch(function (error) {
-    // Handle error
     dotnetCallback.invokeMethodAsync("onError", error);
   });
 }
 
-// window.getData = function(path) {
-//   // firebase.database().ref(path).once()
-// }
+window.showPrompt = function(message, defaultValue, dotnetCallback)
+{
+    var value = prompt(message, defaultValue);
+    return value;
+}
