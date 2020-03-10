@@ -44,7 +44,6 @@ namespace IronJournal.Pages
             this.user = await AuthHelper.GetCurrentUser();
             if (this.ConflictChamberLists == null)
             {
-
                 var firebaseClient = GetFirebaseClient();
                 var lists = await firebaseClient
                     .Child("users")
@@ -54,9 +53,12 @@ namespace IronJournal.Pages
                 // .OnceAsync<Models.CCList>();
 
                 List<Models.CCListWrapper> modelWrappers = new List<Models.CCListWrapper>();
-                foreach (var list in lists)
-                {
-                    modelWrappers.Add(await GetListDetails(list));
+
+                if(lists != null && lists.Length > 0) {
+                    foreach (var list in lists)
+                    {
+                        modelWrappers.Add(await GetListDetails(list));
+                    }
                 }
 
                 this.ConflictChamberLists = new List<Models.CCListWrapper>(modelWrappers);
