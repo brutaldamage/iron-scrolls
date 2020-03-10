@@ -5,8 +5,7 @@ namespace IronJournal.Models
 {
     public class FirebaseUser 
     {
-        [JsonProperty("uid")]
-        public string Id { get;set;}
+        public string Uid { get;set;}
 
         public string DisplayName { get;set;}
 
@@ -45,5 +44,18 @@ return new DateTime(ticks: ticks);
                 return null;
             }
         }
+
+        public FirebaseTokenInfo StsTokenManager { get; set; }
+    }
+
+    public class FirebaseTokenInfo
+    {
+        public string ApiKey { get;set;}
+
+        public string RefreshToken {get;set;}
+
+        public string AccessToken { get; set;}
+
+        public long ExpirationTime { get; set; }
     }
 }

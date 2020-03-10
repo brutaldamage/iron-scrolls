@@ -1,0 +1,26 @@
+@page "/cc-lists"
+
+<h1>My Conflict Chamber Lists</h1>
+
+@if(this.ConflictChamberLists == null) 
+{
+  <div class="loader"></div>  
+}
+else  if(this.ConflictChamberLists != null)
+{
+  <table>
+    <tr>
+      <td>Faction</td>
+      <td>Caster</td>
+      <td>Link</td>
+    </tr>
+    @foreach(var list in ConflictChamberLists)
+    {
+      <tr>
+        <td>@list.Faction</td>
+        <td>@list.Caster</td>
+        <td>@list.Url</td>
+      </tr>
+    }
+  </table>
+}

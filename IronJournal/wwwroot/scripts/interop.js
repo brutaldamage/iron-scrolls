@@ -74,5 +74,22 @@ window.doLogout = function () {
 }
 
 window.getUser = function () {
-  return firebase.auth().currentUser;
+  var user = firebase.auth().currentUser;
+  return user;
 }
+
+window.getUserIdToken = function (forceRefresh, dotnetCallback) {
+  firebase.auth().currentUser.getIdToken(/* forceRefresh */ forceRefresh).then(function (idToken) {
+    console.log("id token: " + idToken);
+    dotnetCallback.invokeMethodAsync("onComplete", idToken);
+    // Send token to your backend via HTTPS
+    // ...
+  }).catch(function (error) {
+    // Handle error
+    dotnetCallback.invokeMethodAsync("onError", error);
+  });
+}
+
+// window.getData = function(path) {
+//   // firebase.database().ref(path).once()
+// }

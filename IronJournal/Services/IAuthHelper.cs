@@ -12,5 +12,7 @@ namespace IronJournal.Services
         Task OnSignOutCompleted();
 
         Task<FirebaseUser> GetCurrentUser(CancellationToken cancellation = default(CancellationToken));
+
+        Task<string> GetUserIdToken();
     }
 }

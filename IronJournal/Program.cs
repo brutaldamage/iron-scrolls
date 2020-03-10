@@ -14,6 +14,7 @@ namespace IronJournal
 
             // add internal services
             builder.Services.AddSingleton<IAuthHelper, AuthHelper>();
+            builder.Services.AddScoped<Firebase.IHttpClientFactory, Util.FirebaseHttpClientFactory>();
 
             // Use our CustomAuthenticationProvider as the 
             // AuthenticationStateProvider

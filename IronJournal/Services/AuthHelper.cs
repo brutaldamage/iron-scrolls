@@ -87,5 +87,21 @@ namespace IronJournal.Services
                 return null;
             }
         }
+    
+        public async Task<string> GetUserIdToken()
+        {
+            // get the user first to make sure user object exists
+            var user = await GetCurrentUser();
+
+            // force refresh
+            var wrapper = new Util.PromiseWrapper<string>();
+            await _jsruntime.InvokeAsync<FirebaseUser>("getUserIdToken", true, DotNetObjectReference.Create(wrapper));
+
+            var idToken = await wrapper.GetResult();
+
+            Console.WriteLine(idToken);
+
+            return idToken.ToString();
+        }
     }
 }
