@@ -1,0 +1,9 @@
+<AuthorizeView>
+    <Authorized>
+        <h6>Hello, @context.User.Identity.Name! </h6>
+        <a href="javascript:void(0);" onclick="doLogout()">[Log Out]</a>
+    </Authorized>
+    <NotAuthorized>
+        <a href="/Account/Login">[Log in]</a>
+    </NotAuthorized>
+</AuthorizeView>

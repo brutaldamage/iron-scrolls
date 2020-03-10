@@ -1,0 +1,19 @@
+﻿@inherits LayoutComponentBase
+
+<div class="sidebar">
+    <NavMenu />
+</div>
+
+<div class="main">
+    <div class="top-row px-4">
+        <LoginDisplay />
+        @* <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a> *@
+            @* <NavLink class="nav-link ml-md-auto" href="account/login">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Login
+            </NavLink> *@
+    </div>
+
+    <div class="content px-4">
+        @Body
+    </div>
+</div>
