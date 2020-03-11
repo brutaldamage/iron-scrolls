@@ -1,12 +1,16 @@
 @page "/cc-lists"
+@using IronJournal.Shared;
+@using IronJournal.ViewModels.Lists;
+
+@inherits BaseComponent<CCListsPageModel>
 
 <h1>Conflict Chamber Lists</h1>
 
-@if(this.ConflictChamberLists == null) 
+@if(this.ViewModel?.ConflictChamberLists == null) 
 {
   <div class="loader"></div>  
 }
-else  if(this.ConflictChamberLists != null)
+else  if(this.ViewModel?.ConflictChamberLists != null)
 {
   <table  class="table">
     <thead>
@@ -16,14 +20,14 @@ else  if(this.ConflictChamberLists != null)
       <th>Theme</th>
       <th>Points</th>
       <th></th>
-      <th><a href="javascript:void(0)" @onclick="@(async () => await AddNewList())">Add List</a></th>
+      <th><a href="javascript:void(0)" @onclick="@(async () => await ViewModel.AddNewList())">Add List</a></th>
     </thead>
-    @foreach(var list in ConflictChamberLists)
+    @foreach(var list in ViewModel.ConflictChamberLists)
     {
       <tr>
         <td colspan="5">@list.Model.Name</td>
         <td><a href="@list.ConflictChamberData.Url" target="_blank">View List</a></td>
-        <td><a href="javascript:void(0)" @onclick="@(async () => await DeleteList(list))">Delete</a></td>
+        <td><a href="javascript:void(0)" @onclick="@(async () => await ViewModel.DeleteList(list))">Delete</a></td>
       </tr>
       foreach(var sublist in list.ConflictChamberData.Lists)
       {

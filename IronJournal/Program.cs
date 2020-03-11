@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Blazor.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -11,6 +12,13 @@ namespace IronJournal
         public static async Task Main(string[] args)
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
+
+            var viewmodelTypes = typeof(Program).Assembly.GetTypes()
+                .Where(x => typeof(ViewModels.BaseViewModel).IsAssignableFrom(x)
+                && !x.IsAbstract);
+
+            foreach (var viewModelType in viewmodelTypes)
+                builder.Services.AddScoped(viewModelType, viewModelType);
 
             // add internal services
             builder.Services.AddSingleton<IAuthHelper, AuthHelper>();
