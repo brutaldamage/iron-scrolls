@@ -11,22 +11,18 @@ namespace IronJournal.ViewModels.Lists
     {
         private readonly IDialogs _dialogs;
         private readonly IDataService _dataService;
-        private readonly IAuthHelper _authHelper;
         private UserModel user;
 
         public List<Models.CCListDataModel> ConflictChamberLists { get; private set; }
 
-        public CCListsPageModel(IDialogs dialogs, IDataService dataService, IAuthHelper authHelper)
+        public CCListsPageModel(IDialogs dialogs, IDataService dataService)
         {
             _dialogs = dialogs;
             _dataService = dataService;
-            _authHelper = authHelper;
         }
 
         public override async Task InitializeAsync()
         {
-            this.user = await _authHelper.GetCurrentUser();
-
             var lists = await _dataService.GetLists();
 
             this.ConflictChamberLists = new List<Models.CCListDataModel>(lists);

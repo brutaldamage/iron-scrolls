@@ -11,20 +11,13 @@ window.select2Component = {
 }
 
 window.internalAuth = {
-  onSignInCompleted: function () {
-    // var userJson = JSON.stringify(user);
-    window.internalAuth.dotnetAuth.invokeMethodAsync('OnSignInCompleted');
+  onSignInCompleted: function (user) {
+    window.internalAuth.dotnetAuth.invokeMethodAsync('OnSignInCompleted', user);
   },
 
   onSignOutCompleted: function () {
-    // var userJson = JSON.stringify(user);
     window.internalAuth.dotnetAuth.invokeMethodAsync('OnSignOutCompleted');
-  },
-
-  // registerAuth: function(dotnetAuth) {
-  //     console.log("register auth invoked");
-  //     window.internalAuth.dotnetAuth = dotnetAuth;
-  // }
+  }
 }
 
 window.onAppInitialized = function (dotnetAuth) {
@@ -49,7 +42,7 @@ window.onAppInitialized = function (dotnetAuth) {
   firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
       // User is signed in.
-      window.internalAuth.onSignInCompleted();
+      window.internalAuth.onSignInCompleted(user);
     } else {
       // No user is signed in.
       window.internalAuth.onSignOutCompleted();

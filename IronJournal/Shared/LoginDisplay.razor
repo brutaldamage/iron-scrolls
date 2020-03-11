@@ -1,6 +1,10 @@
+@using System.Linq;
+
 <AuthorizeView>
     <Authorized>
         <h6>Hello, @context.User.Identity.Name! </h6>
+        @{var photoUrl = context.User.Claims.FirstOrDefault(x => x.Type == "Avatar")?.Value;}
+        <img src="@photoUrl" width="40" height="40" />
         <a href="javascript:void(0);" onclick="doLogout()">[Log Out]</a>
     </Authorized>
     <NotAuthorized>

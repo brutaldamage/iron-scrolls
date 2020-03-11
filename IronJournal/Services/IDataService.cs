@@ -14,273 +14,296 @@ using Newtonsoft.Json.Linq;
 
 namespace IronJournal.Services
 {
-	public interface IDataService
-	{
-		Task<Models.CC.CCInfoResponse> GetConflictChamberList(string ccid);
+    public interface IDataService
+    {
+        Task<Models.CC.CCInfoResponse> GetConflictChamberList(string ccid);
 
-		Task<Models.CCListDataModel[]> GetLists();
+        Task<Models.CCListDataModel[]> GetLists();
 
-		Task DeleteList(CCListDataModel list);
+        Task DeleteList(CCListDataModel list);
 
-		Task<Models.CCListDataModel> CreateList(string name, string ccid, int index);
+        Task<Models.CCListDataModel> CreateList(string name, string ccid, int index);
 
-		Task<Models.FactionModel[]> GetFactions();
+        Task<Models.FactionModel[]> GetFactions();
 
-		Task<Models.ModelModel[]> GetModels(int? id = null, int? factionId = null, int? typeId = null);
+        Task<Models.ModelModel[]> GetModels(int? id = null, int? factionId = null, int? typeId = null);
 
-		Task<Models.GameModel[]> GetGames();
+        Task<Models.GameModel[]> GetGames();
 
-		Task AddGame(Models.GameModel model);
+        Task AddGame(Models.GameModel model);
 
-		Task<Models.GameModel> GetGame(int index);
+        Task<Models.GameModel> GetGame(int index);
 
-		Task<Models.ScenarioModel[]> GetScenarios();
+        Task<Models.ScenarioModel[]> GetScenarios();
 
-		Task<Models.InitiativeModel[]> GetInitiatives();
+        Task<Models.InitiativeModel[]> GetInitiatives();
 
-		Task<Models.GameResultModel[]> GetGameResults();
+        Task<Models.GameResultModel[]> GetGameResults();
 
-	}
+        Task UpdatePlayerInfo(PlayerInfoModel info);
 
-	public class DataService : IDataService
-	{
-		private readonly Firebase.IHttpClientFactory _httpClient;
-		private readonly IAuthHelper _authHelper;
+        Task<Models.PlayerInfoModel[]> GetPlayerInfos();
+    }
 
-		public DataService(Firebase.IHttpClientFactory httpClientFactory, IAuthHelper authHelper)
-		{
-			_httpClient = httpClientFactory;
-			_authHelper = authHelper;
-		}
+    public class DataService : IDataService
+    {
+        private readonly Firebase.IHttpClientFactory _httpClient;
+        private readonly ICurrentUser _currentUser;
 
-		public async Task<Models.CCListDataModel[]> GetLists()
-		{
-			var user = await this._authHelper.GetCurrentUser();
-			var lists = await GetFirebaseLists(user);
+        public DataService(Firebase.IHttpClientFactory httpClientFactory, ICurrentUser currentUser)
+        {
+            _httpClient = httpClientFactory;
+            _currentUser = currentUser;
+        }
 
-			var modelWrappers = new List<CCListDataModel>();
+        public async Task<Models.CCListDataModel[]> GetLists()
+        {
+            var user = await this._currentUser.GetCurrentUser();
+            var lists = await GetFirebaseLists(user);
 
-			if (lists != null && lists.Length > 0)
-			{
-				foreach (var list in lists)
-				{
-					modelWrappers.Add(await GetListDetails(list));
-				}
-			}
+            var modelWrappers = new List<CCListDataModel>();
 
-			return modelWrappers?.ToArray();
-		}
+            if (lists != null && lists.Length > 0)
+            {
+                foreach (var list in lists)
+                {
+                    modelWrappers.Add(await GetListDetails(list));
+                }
+            }
 
-		public async Task DeleteList(CCListDataModel list)
-		{
-			var user = await this._authHelper.GetCurrentUser();
-			var lists = (await GetFirebaseLists(user)).ToList();
+            return modelWrappers?.ToArray();
+        }
 
-			var match = lists.FirstOrDefault(x => x.ListId == list.Model.ListId);
+        public async Task DeleteList(CCListDataModel list)
+        {
+            var user = await this._currentUser.GetCurrentUser();
+            var lists = (await GetFirebaseLists(user)).ToList();
 
-			if (match != null)
-			{
-				var index = lists.IndexOf(match);
+            var match = lists.FirstOrDefault(x => x.ListId == list.Model.ListId);
 
-				await DeleteFireBaseList(user, index);
-			}
-		}
+            if (match != null)
+            {
+                var index = lists.IndexOf(match);
 
-		public async Task<Models.CCListDataModel> CreateList(string name, string ccid, int index)
-		{
-			var link = string.Format("https://conflictchamber.com/?{0}", ccid);
-			var newItem = new Models.CCListItem
-			{
-				Name = name,
-				ListId = ccid,
-				Url = link
-			};
+                await DeleteFireBaseList(user, index);
+            }
+        }
 
-			var user = await _authHelper.GetCurrentUser();
-			var listDetails = await GetListDetails(newItem);
+        public async Task<Models.CCListDataModel> CreateList(string name, string ccid, int index)
+        {
+            var link = string.Format("https://conflictchamber.com/?{0}", ccid);
+            var newItem = new Models.CCListItem
+            {
+                Name = name,
+                ListId = ccid,
+                Url = link
+            };
 
-			if (listDetails.ConflictChamberData.Lists.Length > 1)
-			{
-				throw new Util.ValidationException("This Conflict Chamber list contains more than 1 caster. Lists with only 1 caster are currently supported.");
-			}
+            var user = await _currentUser.GetCurrentUser();
+            var listDetails = await GetListDetails(newItem);
 
-			var fbClient = GetFirebaseClient();
-			await fbClient.Child("users")
-				.Child(user.Uid)
-				.Child("cc_lists")
-				.Child(index.ToString())
-				.PutAsync(newItem);
+            if (listDetails.ConflictChamberData.Lists.Length > 1)
+            {
+                throw new Util.ValidationException("This Conflict Chamber list contains more than 1 caster. Lists with only 1 caster are currently supported.");
+            }
 
-			return listDetails;
-		}
+            var fbClient = GetFirebaseClient();
+            await fbClient.Child("users")
+                .Child(user.Uid)
+                .Child("cc_lists")
+                .Child(index.ToString())
+                .PutAsync(newItem);
 
-		public async Task<Models.FactionModel[]> GetFactions()
-		{
-			var json = await GetHttpClient().GetStringAsync("/data/factions.json");
+            return listDetails;
+        }
 
-			return JsonConvert.DeserializeObject<FactionModel[]>(json);
-		}
+        public async Task<Models.FactionModel[]> GetFactions()
+        {
+            var json = await GetHttpClient().GetStringAsync("/data/factions.json");
 
-		public async Task<Models.ModelModel[]> GetModels(int? id = null, int? factionId = null, int? typeId = null)
-		{
-			var json = await GetHttpClient().GetStringAsync("/data/factions.json");
-			var models = JsonConvert.DeserializeObject<ModelModel[]>(json);
+            return JsonConvert.DeserializeObject<FactionModel[]>(json);
+        }
 
-			if (id.HasValue)
-			{
-				return models.Where(x => x.Id == id.Value).ToArray();
-			}
-			else
-			{
-				IEnumerable<ModelModel> filter = models;
+        public async Task<Models.ModelModel[]> GetModels(int? id = null, int? factionId = null, int? typeId = null)
+        {
+            var json = await GetHttpClient().GetStringAsync("/data/factions.json");
+            var models = JsonConvert.DeserializeObject<ModelModel[]>(json);
 
-				if (factionId.HasValue)
-					filter = filter.Where(x => x.FactionId == factionId.Value);
+            if (id.HasValue)
+            {
+                return models.Where(x => x.Id == id.Value).ToArray();
+            }
+            else
+            {
+                IEnumerable<ModelModel> filter = models;
 
-				if (typeId.HasValue)
-					filter = filter.Where(x => x.ModelType == typeId.Value);
+                if (factionId.HasValue)
+                    filter = filter.Where(x => x.FactionId == factionId.Value);
 
-				return filter.ToArray();
-			}
-		}
+                if (typeId.HasValue)
+                    filter = filter.Where(x => x.ModelType == typeId.Value);
 
-		public async Task<Models.GameModel[]> GetGames()
-		{
-			var user = await _authHelper.GetCurrentUser();
-			var firebaseClient = GetFirebaseClient();
-			var games = await firebaseClient
-				.Child("users")
-				.Child(user.Uid)
-				.Child("games")
-				.OnceSingleAsync<Models.GameModel[]>();
+                return filter.ToArray();
+            }
+        }
 
-			return games ?? new GameModel[0];
-		}
+        public async Task<Models.GameModel[]> GetGames()
+        {
+            var user = await _currentUser.GetCurrentUser();
+            var firebaseClient = GetFirebaseClient();
+            var games = await firebaseClient
+                .Child("users")
+                .Child(user.Uid)
+                .Child("games")
+                .OnceSingleAsync<Models.GameModel[]>();
 
-		public async Task AddGame(Models.GameModel model)
-		{
-			var user = await _authHelper.GetCurrentUser();
+            return games ?? new GameModel[0];
+        }
 
-			// make sure games exists:
-			var games = await GetGames();
-			int index = 0;
-			if (games != null)
-			{
-				index = games.Length;
-			}
+        public async Task AddGame(Models.GameModel model)
+        {
+            var user = await _currentUser.GetCurrentUser();
 
-			var firebaseClient = GetFirebaseClient();
-			await firebaseClient
-				.Child("users")
-				.Child(user.Uid)
-				.Child("games")
-				.Child(index.ToString())
-				.PutAsync(model);
+            // make sure games exists:
+            var games = await GetGames();
+            int index = 0;
+            if (games != null)
+            {
+                index = games.Length;
+            }
 
-		}
+            var firebaseClient = GetFirebaseClient();
+            await firebaseClient
+                .Child("users")
+                .Child(user.Uid)
+                .Child("games")
+                .Child(index.ToString())
+                .PutAsync(model);
 
-		public async Task<Models.GameModel> GetGame(int index)
-		{
-			var user = await _authHelper.GetCurrentUser();
+        }
+
+        public async Task<Models.GameModel> GetGame(int index)
+        {
+            var user = await _currentUser.GetCurrentUser();
 
 
-			var firebaseClient = GetFirebaseClient();
-			return await firebaseClient
-				.Child("users")
-				.Child(user.Uid)
-				.Child("games")
-				.Child(index.ToString())
-				.OnceSingleAsync<GameModel>();
-		}
+            var firebaseClient = GetFirebaseClient();
+            return await firebaseClient
+                .Child("users")
+                .Child(user.Uid)
+                .Child("games")
+                .Child(index.ToString())
+                .OnceSingleAsync<GameModel>();
+        }
 
-		public async Task<Models.ScenarioModel[]> GetScenarios()
-		{
-			var json = await GetHttpClient().GetStringAsync("/data/scenarios.json");
-			var models = JsonConvert.DeserializeObject<ScenarioModel[]>(json);
+        public async Task<Models.ScenarioModel[]> GetScenarios()
+        {
+            var json = await GetHttpClient().GetStringAsync("/data/scenarios.json");
+            var models = JsonConvert.DeserializeObject<ScenarioModel[]>(json);
 
-			return models;
-		}
+            return models;
+        }
 
-		public async Task<Models.InitiativeModel[]> GetInitiatives()
-		{
-			var json = await GetHttpClient().GetStringAsync("/data/initiatives.json");
-			var models = JsonConvert.DeserializeObject<InitiativeModel[]>(json);
+        public async Task<Models.InitiativeModel[]> GetInitiatives()
+        {
+            var json = await GetHttpClient().GetStringAsync("/data/initiatives.json");
+            var models = JsonConvert.DeserializeObject<InitiativeModel[]>(json);
 
-			return models;
-		}
+            return models;
+        }
 
-		public async Task<Models.GameResultModel[]> GetGameResults()
-		{
-			var json = await GetHttpClient().GetStringAsync("/data/results.json");
-			var models = JsonConvert.DeserializeObject<GameResultModel[]>(json);
+        public async Task<Models.GameResultModel[]> GetGameResults()
+        {
+            var json = await GetHttpClient().GetStringAsync("/data/results.json");
+            var models = JsonConvert.DeserializeObject<GameResultModel[]>(json);
 
-			return models;
-		}
+            return models;
+        }
 
-		#region Private Helper Methods
+        public async Task UpdatePlayerInfo(PlayerInfoModel info)
+        {
+            var firebaseClient = GetFirebaseClient();
+            await firebaseClient
+                .Child("players")
+                .Child(info.Uid)
+                .PutAsync(info);
+        }
 
-		private async Task<CCListDataModel> GetListDetails(CCListItem list)
-		{
-			var details = await this.GetConflictChamberList(list.ListId);
+        public async Task<PlayerInfoModel[]> GetPlayerInfos()
+        {
+            var firebaseClient = GetFirebaseClient();
+            var players = await firebaseClient
+                .Child("players")
+                .OnceSingleAsync<Dictionary<string, PlayerInfoModel>>();
 
-			var item = new CCListDataModel
-			{
-				// todo: internal info
-				Model = list,
-				ConflictChamberData = details
-			};
+            return players.Select(x => x.Value).ToArray();
+        }
 
-			return item;
-		}
+        public async Task<CCInfoResponse> GetConflictChamberList(string ccid)
+        {
+            var httpClient = GetHttpClient();
+            var url = $"https://api.conflictchamber.com/list/{ccid}.JSON";
+            var json = await httpClient.GetStringAsync(url);
 
-		private async Task<CCListItem[]> GetFirebaseLists(UserModel user)
-		{
-			var firebaseClient = GetFirebaseClient();
-			var lists = await firebaseClient
-				.Child("users")
-				.Child(user.Uid)
-				.Child("cc_lists")
-				.OnceSingleAsync<Models.CCListItem[]>();
+            Console.WriteLine("cc json: " + json);
 
-			return lists;
-		}
+            return JsonConvert.DeserializeObject<CCInfoResponse>(json);
+        }
 
-		private async Task DeleteFireBaseList(UserModel user, int index)
-		{
-			var fbClient = GetFirebaseClient();
-			await fbClient.Child("users")
-									.Child(user.Uid)
-									.Child("cc_lists")
-									.Child(index.ToString())
-									.DeleteAsync();
-		}
 
-		public async Task<CCInfoResponse> GetConflictChamberList(string ccid)
-		{
-			var httpClient = GetHttpClient();
-			var url = $"https://api.conflictchamber.com/list/{ccid}.JSON";
-			var json = await httpClient.GetStringAsync(url);
+        #region Private Helper Methods
 
-			Console.WriteLine("cc json: " + json);
+        private async Task<CCListDataModel> GetListDetails(CCListItem list)
+        {
+            var details = await this.GetConflictChamberList(list.ListId);
 
-			return JsonConvert.DeserializeObject<CCInfoResponse>(json);
-		}
+            var item = new CCListDataModel
+            {
+                // todo: internal info
+                Model = list,
+                ConflictChamberData = details
+            };
 
-		FirebaseClient GetFirebaseClient()
-		{
-			var firebaseClient = new FirebaseClient(
-					"https://iron-journal.firebaseio.com/",
-					new FirebaseOptions
-					{
-						AuthTokenAsyncFactory = () => _authHelper.GetUserIdToken(),
-						HttpClientFactory = this._httpClient
-					});
+            return item;
+        }
 
-			return firebaseClient;
-		}
+        private async Task<CCListItem[]> GetFirebaseLists(UserModel user)
+        {
+            var firebaseClient = GetFirebaseClient();
+            var lists = await firebaseClient
+                .Child("users")
+                .Child(user.Uid)
+                .Child("cc_lists")
+                .OnceSingleAsync<Models.CCListItem[]>();
 
-		HttpClient GetHttpClient() => this._httpClient.GetHttpClient(null).GetHttpClient();
+            return lists;
+        }
 
-		#endregion
-	}
+        private async Task DeleteFireBaseList(UserModel user, int index)
+        {
+            var fbClient = GetFirebaseClient();
+            await fbClient.Child("users")
+                                    .Child(user.Uid)
+                                    .Child("cc_lists")
+                                    .Child(index.ToString())
+                                    .DeleteAsync();
+        }
+
+        FirebaseClient GetFirebaseClient()
+        {
+            var firebaseClient = new FirebaseClient(
+                    "https://iron-journal.firebaseio.com/",
+                    new FirebaseOptions
+                    {
+                        AuthTokenAsyncFactory = () => _currentUser.GetUserIdToken(),
+                        HttpClientFactory = this._httpClient
+                    });
+
+            return firebaseClient;
+        }
+
+        HttpClient GetHttpClient() => this._httpClient.GetHttpClient(null).GetHttpClient();
+
+        #endregion
+    }
 }

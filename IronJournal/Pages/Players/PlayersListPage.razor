@@ -1,0 +1,30 @@
+@page "/players"
+@using IronJournal.Shared;
+@using IronJournal.ViewModels.Players;
+
+@inherits BaseComponent<PlayerListPageModel>
+@attribute [Authorize]
+
+<h1>Players</h1>
+
+@if(this.ViewModel.IsLoading) 
+{
+  <div class="loader"></div>  
+}
+else
+{
+  <table  class="table">
+    <thead>
+      <th>Player Name</th>
+    </thead>
+      @if(this.ViewModel.Players != null)
+      {
+        foreach(var player in ViewModel.Players)
+        {
+          <tr>
+            <td><img src="@player.PhotoUrl" width="40" height="40"/><span width="40"></span>@player.Name</td>
+          </tr>
+        }
+      }
+  </table>
+}

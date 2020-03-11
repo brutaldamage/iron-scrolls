@@ -24,6 +24,7 @@ namespace IronJournal
             builder.Services.AddSingleton<IAuthHelper, AuthHelper>();
             builder.Services.AddSingleton<IDataService, DataService>();
             builder.Services.AddSingleton<Util.IDialogs, Util.Dialogs>();
+            builder.Services.AddSingleton<ICurrentUser, CurrentUser>();
             builder.Services.AddScoped<Firebase.IHttpClientFactory, Util.FirebaseHttpClientFactory>();
 
             // Use our CustomAuthenticationProvider as the 

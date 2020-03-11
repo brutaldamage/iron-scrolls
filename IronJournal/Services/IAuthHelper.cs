@@ -7,12 +7,8 @@ namespace IronJournal.Services
 {
     public interface IAuthHelper
     {
-        Task OnSignInCompleted();
+        Task OnSignInCompleted(UserModel user);
 
         Task OnSignOutCompleted();
-
-        Task<UserModel> GetCurrentUser(CancellationToken cancellation = default(CancellationToken));
-
-        Task<string> GetUserIdToken();
     }
 }
