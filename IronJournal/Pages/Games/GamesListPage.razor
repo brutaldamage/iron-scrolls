@@ -5,6 +5,9 @@
 
 @inherits BaseComponent<GamesListPageModel>
 
+@attribute [Authorize]
+
+
 <h1>Games</h1>
 
 @if(this.ViewModel.IsLoading)

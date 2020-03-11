@@ -4,6 +4,7 @@
 @using IronJournal.ViewModels.Games;
 
 @inherits BaseComponent<AddGamePageModel>
+@attribute [Authorize]
 
 <h1>Add Game</h1>
 @if(ViewModel.IsLoading) 
