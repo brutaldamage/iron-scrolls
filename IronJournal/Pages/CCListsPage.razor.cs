@@ -44,40 +44,11 @@ namespace IronJournal.Pages
             this.user = await AuthHelper.GetCurrentUser();
             if (this.ConflictChamberLists == null)
             {
-                var firebaseClient = GetFirebaseClient();
-                var lists = await firebaseClient
-                    .Child("users")
-                    .Child(user.Uid)
-                    .Child("cc_lists")
-                    .OnceSingleAsync<Models.CCList[]>();
-                // .OnceAsync<Models.CCList>();
+                var lists = await this.DataService.GetLists();
 
-                List<Models.CCListWrapper> modelWrappers = new List<Models.CCListWrapper>();
-
-                if(lists != null && lists.Length > 0) {
-                    foreach (var list in lists)
-                    {
-                        modelWrappers.Add(await GetListDetails(list));
-                    }
-                }
-
-                this.ConflictChamberLists = new List<Models.CCListWrapper>(modelWrappers);
+                this.ConflictChamberLists = new List<Models.CCListWrapper>(lists);
                 this.StateHasChanged();
             }
-        }
-
-        private async Task<CCListWrapper> GetListDetails(CCList list)
-        {
-            var details = await this.DataService.GetConflictChamberList(list.ListId);
-
-            var item = new CCListWrapper
-            {
-                // todo: internal info
-                Model = list,
-                ConflictChamberData = details
-            };
-
-            return item;
         }
 
         async Task DeleteList(CCListWrapper model)
@@ -87,13 +58,7 @@ namespace IronJournal.Pages
                 var index = this.ConflictChamberLists.IndexOf(model);
                 if (index >= 0)
                 {
-                    var fbClient = GetFirebaseClient();
-                    var newIndex = this.ConflictChamberLists.Count;
-                    await fbClient.Child("users")
-                        .Child(user.Uid)
-                        .Child("cc_lists")
-                        .Child(index.ToString())
-                        .DeleteAsync();
+                    await DataService.DeleteList(model);
 
                     this.ConflictChamberLists.RemoveAt(index);
                     this.StateHasChanged();
@@ -108,7 +73,7 @@ namespace IronJournal.Pages
                 return;
 
             var name = await this.Dialogs.ShowPrompt("Enter a name for this list");
-            if(string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name))
                 return;
 
 
@@ -127,44 +92,11 @@ namespace IronJournal.Pages
                 return;
             }
 
-            var newItem = new Models.CCList
-            {
-                Name = name,
-                ListId = ccId,
-                Url = link
-            };
+            // new index is whatever the "count" of the list is, from 0 based indexing
+            var created = await this.DataService.CreateList(name, ccId, this.ConflictChamberLists.Count);
 
-            var fbClient = GetFirebaseClient();
-            var newIndex = this.ConflictChamberLists.Count;
-            await fbClient.Child("users")
-                .Child(user.Uid)
-                .Child("cc_lists")
-                .Child(newIndex.ToString())
-                .PutAsync(newItem);
-
-            var details = await GetListDetails(newItem);
-
-            this.ConflictChamberLists.Add(details);
+            this.ConflictChamberLists.Add(created);
             this.StateHasChanged();
-        }
-
-        async Task<string> GetUserApiKey()
-        {
-            var user = await AuthHelper.GetCurrentUser();
-            return user.ApiKey;
-        }
-
-        FirebaseClient GetFirebaseClient()
-        {
-            var firebaseClient = new FirebaseClient(
-                    "https://iron-journal.firebaseio.com/",
-                    new FirebaseOptions
-                    {
-                        AuthTokenAsyncFactory = () => AuthHelper.GetUserIdToken(),
-                        HttpClientFactory = this.HttpClient
-                    });
-
-            return firebaseClient;
         }
     }
 }
