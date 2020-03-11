@@ -1,0 +1,32 @@
+[
+    {
+        "id" : 1,
+        "name" : "King of The Hill",
+        "year" : "SR2019"
+    },
+    {
+        "id" : 2,
+        "name" : "Bunkers",
+        "year" : "SR2019"
+    },
+    {
+        "id" : 3,
+        "name" : "Spread The Net",
+        "year" : "SR2019"
+    },
+    {
+        "id" : 4,
+        "name" : "Invasion",
+        "year" : "SR2019"
+    },
+    {
+        "id" : 5,
+        "name" : "Anarchy",
+        "year" : "SR2019"
+    },
+    {
+        "id" : 6,
+        "name" : "Recon II",
+        "year" : "SR2019"
+    }
+]

@@ -12,6 +12,7 @@
 }
 else  if(this.ViewModel?.ConflictChamberLists != null)
 {
+  <button class="btn btn-primary" @onclick="@(async () => await ViewModel.AddNewList())">Add List</button>
   <table  class="table">
     <thead>
       <th>List Name</th>
@@ -20,27 +21,19 @@ else  if(this.ViewModel?.ConflictChamberLists != null)
       <th>Theme</th>
       <th>Points</th>
       <th></th>
-      <th><a href="javascript:void(0)" @onclick="@(async () => await ViewModel.AddNewList())">Add List</a></th>
+      <th></th>
     </thead>
     @foreach(var list in ViewModel.ConflictChamberLists)
     {
       <tr>
-        <td colspan="5">@list.Model.Name</td>
+        <td>@list.Model.Name</td>
+          <td>@list.ConflictChamberData.Faction</td>
+          <td>@list.ConflictChamberData.Lists[0].Caster</td>
+          <td>@list.ConflictChamberData.Lists[0].Theme</td>
+          <td>@list.ConflictChamberData.Lists[0].Points</td>
         <td><a href="@list.ConflictChamberData.Url" target="_blank">View List</a></td>
         <td><a href="javascript:void(0)" @onclick="@(async () => await ViewModel.DeleteList(list))">Delete</a></td>
       </tr>
-      foreach(var sublist in list.ConflictChamberData.Lists)
-      {
-        <tr>
-          <td></td>
-          <td>@list.ConflictChamberData.Faction</td>
-          <td>@sublist.Caster</td>
-          <td>@sublist.Theme</td>
-          <td>@sublist.Points</td>
-          <td></td>
-          <td></td>
-        </tr>
-      }
     }
   </table>
 }

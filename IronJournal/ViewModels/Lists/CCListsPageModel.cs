@@ -12,9 +12,9 @@ namespace IronJournal.ViewModels.Lists
         private readonly IDialogs _dialogs;
         private readonly IDataService _dataService;
         private readonly IAuthHelper _authHelper;
-        private FirebaseUser user;
+        private UserModel user;
 
-        public List<Models.CCListWrapper> ConflictChamberLists { get; private set; }
+        public List<Models.CCListDataModel> ConflictChamberLists { get; private set; }
 
         public CCListsPageModel(IDialogs dialogs, IDataService dataService, IAuthHelper authHelper)
         {
@@ -29,10 +29,10 @@ namespace IronJournal.ViewModels.Lists
 
             var lists = await _dataService.GetLists();
 
-            this.ConflictChamberLists = new List<Models.CCListWrapper>(lists);
+            this.ConflictChamberLists = new List<Models.CCListDataModel>(lists);
         }
 
-        public async Task DeleteList(CCListWrapper item)
+        public async Task DeleteList(CCListDataModel item)
         {
             if (await _dialogs.ShowConfirm("Are you sure you want to delete this list?"))
             {
@@ -49,34 +49,39 @@ namespace IronJournal.ViewModels.Lists
 
         public async Task AddNewList()
         {
-            var link = await _dialogs.ShowPrompt("Enter a conflict chamber list");
-            if (string.IsNullOrEmpty(link))
-                return;
+            try {
+                var link = await _dialogs.ShowPrompt("Enter a conflict chamber list");
+                if (string.IsNullOrEmpty(link))
+                    return;
 
-            var name = await _dialogs.ShowPrompt("Enter a name for this list");
-            if (string.IsNullOrEmpty(name))
-                return;
+                var name = await _dialogs.ShowPrompt("Enter a name for this list");
+                if (string.IsNullOrEmpty(name))
+                    return;
 
+                string ccId = null;
+                Uri uri = default(Uri);
+                try
+                {
+                    uri = new Uri(link);
+                    ccId = CCHelper.GetListId(uri);
+                }
+                catch (Exception)
+                {
+                    await _dialogs.ShowAlert("Link entered was invalid.");
+                    return;
+                }
 
-            string ccId = null;
-            Uri uri = default(Uri);
-            try
-            {
-                uri = new Uri(link);
-                var pathAndQuery = uri.PathAndQuery;
-                ccId = pathAndQuery.Substring(2);
+                // new index is whatever the "count" of the list is, from 0 based indexing
+                var created = await _dataService.CreateList(name, ccId, this.ConflictChamberLists.Count);
+
+                this.ConflictChamberLists.Add(created);
+                RaisePropertyChanged(nameof(ConflictChamberLists));
             }
-            catch (Exception)
+            catch(ValidationException ex)
             {
-                await _dialogs.ShowAlert("Link entered was invalid.");
-                return;
+                Console.WriteLine(ex.Message);
+                await this._dialogs.ShowAlert(ex.Message);   
             }
-
-            // new index is whatever the "count" of the list is, from 0 based indexing
-            var created = await _dataService.CreateList(name, ccId, this.ConflictChamberLists.Count);
-
-            this.ConflictChamberLists.Add(created);
-            RaisePropertyChanged(nameof(ConflictChamberLists));
         }
     }
 }

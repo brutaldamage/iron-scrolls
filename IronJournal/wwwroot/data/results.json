@@ -1,0 +1,62 @@
+[
+    {
+        "id": 1,
+        "name": "Assasination Win"
+    },
+    {
+        "id": 2,
+        "name": "Scenario Win"
+    },
+    {
+        "id": 3,
+        "name": "1st Tiebreaker Win"
+    },
+    {
+        "id": 4,
+        "name": "2nd Tiebreaker Win"
+    },
+    {
+        "id": 5,
+        "name": "3rd Tiebreaker Win"
+    },
+    {
+        "id": 6,
+        "name": "4th Tiebreaker Win"
+    },
+    {
+        "id": 7,
+        "name": "Death Clock Win"
+    },
+    {
+        "id": 8,
+        "name": "Draw"
+    },
+    {
+        "id": 9,
+        "name": "Assasination Loss"
+    },
+    {
+        "id": 10,
+        "name": "Scenario Loss"
+    },
+    {
+        "id": 11,
+        "name": "1st Tiebreaker Loss"
+    },
+    {
+        "id": 12,
+        "name": "2nd Tiebreaker Loss"
+    },
+    {
+        "id": 13,
+        "name": "3rd Tiebreaker Loss"
+    },
+    {
+        "id": 14,
+        "name": "4th Tiebreaker Loss"
+    },
+    {
+        "id": 15,
+        "name": "Death Clock Loss"
+    }
+]

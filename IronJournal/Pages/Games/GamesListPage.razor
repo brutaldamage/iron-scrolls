@@ -1,0 +1,43 @@
+@page "/games"
+
+@using IronJournal.Shared;
+@using IronJournal.ViewModels.Games;
+
+@inherits BaseComponent<GamesListPageModel>
+
+<h1>Games</h1>
+
+@if(this.ViewModel.IsLoading)
+{
+    <div class="loader"></div>  
+}
+else 
+{
+    <button class="btn btn-primary" @onclick="@(async () => await ViewModel.AddGame())">Add Game</button>
+    <table class="table">
+        <thead>
+            <th>Date</th>
+            <th>Faction</th>
+            <th>Caster</th>
+            <th>Opponent Faction</th>
+            <th>Opponent Caster</th>
+            <th>Scenario</th>
+            <th>Result</th>
+        </thead>
+        @if(ViewModel.Games != null && ViewModel.Games.Count > 0) 
+        {
+            foreach(var game in ViewModel.Games)
+            {
+                <tr>
+                    <td>@game.Date.ToShortDateString()</td>
+                    <td>@game.Faction</td>
+                    <td>@game.Caster</td>
+                    <td>@game.OpponentFaction</td>
+                    <td>@game.OpponentCaster</td>
+                    <td>@game.Scenario</td>
+                    <td>@game.Result</td>
+                </tr>
+            }
+        }
+    </table>
+}

@@ -18,7 +18,7 @@ namespace IronJournal
                 && !x.IsAbstract);
 
             foreach (var viewModelType in viewmodelTypes)
-                builder.Services.AddScoped(viewModelType, viewModelType);
+                builder.Services.AddTransient(viewModelType, viewModelType);
 
             // add internal services
             builder.Services.AddSingleton<IAuthHelper, AuthHelper>();

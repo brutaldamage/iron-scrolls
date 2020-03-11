@@ -1,3 +1,15 @@
+window.select2Component = {
+  init: function (Id) {
+      //Initialize Select2 Elements
+      $('#' + Id).select2({ theme: "bootstrap" });
+  },
+  onChange: function (id, dotnetHelper, nameFunc) {
+      $('#' + id).on('select2:select', function (e) {
+          dotnetHelper.invokeMethodAsync(nameFunc, $('#' + id).val());
+      });
+  },
+}
+
 window.internalAuth = {
   onSignInCompleted: function () {
     // var userJson = JSON.stringify(user);

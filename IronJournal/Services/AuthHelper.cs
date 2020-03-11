@@ -43,7 +43,7 @@ namespace IronJournal.Services
             await Task.CompletedTask;
         }
 
-        public async Task<FirebaseUser> GetCurrentUser(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<UserModel> GetCurrentUser(CancellationToken cancellationToken = default(CancellationToken))
         {
             try 
             {
@@ -76,7 +76,7 @@ namespace IronJournal.Services
                 }
 
                 Console.WriteLine("getting current user");
-                var user = await _jsruntime.InvokeAsync<FirebaseUser>("getUser");
+                var user = await _jsruntime.InvokeAsync<UserModel>("getUser");
                 return user;
             }
             catch(Exception ex)
@@ -94,7 +94,7 @@ namespace IronJournal.Services
 
             // force refresh
             var wrapper = new Util.PromiseWrapper<string>();
-            await _jsruntime.InvokeAsync<FirebaseUser>("getUserIdToken", true, DotNetObjectReference.Create(wrapper));
+            await _jsruntime.InvokeAsync<UserModel>("getUserIdToken", true, DotNetObjectReference.Create(wrapper));
 
             var idToken = await wrapper.GetResult();
 

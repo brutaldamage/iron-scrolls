@@ -1,0 +1,84 @@
+@page "/games/add"
+
+@using IronJournal.Shared;
+@using IronJournal.ViewModels.Games;
+
+@inherits BaseComponent<AddGamePageModel>
+
+<h1>Add Game</h1>
+@if(ViewModel.IsLoading) 
+{
+    <div class="loader"></div>  
+}
+else 
+{
+    <EditForm Model="@ViewModel" OnValidSubmit="@ViewModel.OnSave" class="form-horizontal" role="form">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <p><label class="control-label" for="gameDateInput">Date</label></p>
+            <InputDate id="gameDateInput" class="col-md-6" @bind-Value="ViewModel.Date" />
+        </div>
+
+        <div class="form-group">
+            <p><label class="control-label" for="opponentInput">Opponent</label></p>
+            <InputText id="opponentInput" class="col-md-6" @bind-Value="ViewModel.Opponent" />
+        </div>
+
+        <Select2SelectorField Label="Your List" Id="listSelect"
+                                                        @bind-Value="@ViewModel.SelectedListId"
+                                                        Datasource="ViewModel.ListOptions"
+                                                        ValidationFor="@(() => ViewModel.SelectedListId)" />
+
+        <div class="form-group">
+            <p><label class="control-label" for="opponentListInput">Opponents List</label></p>
+            <InputText id="opponentListInput" class="col-md-6" @bind-Value="ViewModel.OpponentsListUrl"  />
+        </div>
+
+        @if(ViewModel.OpponentsConflictChamberList != null) 
+        {
+            <div class="form-group">
+                <div class="col-md-3"></div>
+                <div class="col-md-6">
+                <p>Faction: @ViewModel.OpponentsConflictChamberList.Faction</p>
+                <p>Caster: @ViewModel.OpponentsConflictChamberList.Lists[0].Caster</p>
+                <p>Theme: @ViewModel.OpponentsConflictChamberList.Lists[0].Theme</p>
+                </div>
+            </div>
+        }
+
+        <Select2SelectorField Label="Scenario" Id="scenarioSelect"
+            @bind-Value="@ViewModel.SelectedScenarioId"
+            Datasource="ViewModel.ScenarioOptions"
+            ValidationFor="@(() => ViewModel.SelectedScenarioId)" />
+
+        <Select2SelectorField Label="Game Result" Id="resultSelect"
+            @bind-Value="@ViewModel.SelectedGameResultId"
+            Datasource="ViewModel.GameResultOptions"
+            ValidationFor="@(() => ViewModel.SelectedGameResultId)" />
+
+        <div class="form-group">
+            <p><label class="control-label" for="cpInput">Control Points</label></p>
+            <InputNumber id="cpInput" class="col-md-6" @bind-Value="ViewModel.ControlPoints" />
+        </div>
+
+        <div class="form-group">
+            <p><label class="control-label" for="ocpInput">Opponents Control Points</label></p>
+            <InputNumber id="ocpInput" class="col-md-6" @bind-Value="ViewModel.OpponentControlPoints" />
+        </div>
+
+        <Select2SelectorField Label="Initiative" Id="initiativeSelect"
+                                                        @bind-Value="@ViewModel.SelectedInitiativeId"
+                                                        Datasource="ViewModel.InitiativeOptions"
+                                                        ValidationFor="@(() => ViewModel.SelectedInitiativeId)" />
+
+        <div class="form-group">
+            <p><label class="control-label" for="commentsInput">Comments</label></p>
+            <InputText id="commentsInput" class="col-md-6" @bind-Value="ViewModel.Comments" />
+        </div>
+
+        <SaveCancelButtons IsSaving="ViewModel.IsSaving" CancelRedirect="/Games" />
+
+    </EditForm>
+}

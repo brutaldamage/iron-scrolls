@@ -1,0 +1,18 @@
+[
+    {
+        "id": 1,
+        "name": "Won Roll, Deployed First"
+    },
+    {
+        "id": 2,
+        "name": "Won Roll, Chose First"
+    },
+    {
+        "id": 3,
+        "name": "Lost Roll, Deployed First"
+    },
+    {
+        "id": 4,
+        "name": "Lost Roll, Chose First"
+    }
+]

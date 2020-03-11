@@ -1,0 +1,97 @@
+[
+    {
+        "id": 1,
+        "sub": 1,
+        "name": "Cygnar",
+        "short": "Cygnar"
+    },
+    {
+        "id": 2,
+        "sub": 1,
+        "name": "Protectorate of Menoth",
+        "short": "Protectorate"
+    },
+    {
+        "id": 3,
+        "sub": 1,
+        "name": "Khador",
+        "short": "Khador"
+    },
+    {
+        "id": 4,
+        "sub": 1,
+        "name": "Cryx",
+        "short": "Cryx"
+    },
+    {
+        "id": 5,
+        "sub": 1,
+        "name": "Retribution of Scyrah",
+        "short": "Retribution"
+    },
+    {
+        "id": 6,
+        "sub": 1,
+        "name": "Mercenaries",
+        "short": "Mercenary"
+    },
+    {
+        "id": 7,
+        "sub": 2,
+        "name": "Trollbloods",
+        "short": "Trollblood"
+    },
+    {
+        "id": 8,
+        "sub": 2,
+        "name": "Circle Orboros",
+        "short": "Circle"
+    },
+    {
+        "id": 9,
+        "sub": 2,
+        "name": "Skorne",
+        "short": "Skorne"
+    },
+    {
+        "id": 10,
+        "sub": 2,
+        "name": "Legion of Everblight",
+        "short": "Legion"
+    },
+    {
+        "id": 11,
+        "sub": 2,
+        "name": "Minions",
+        "short": "Minion"
+    },
+    {
+        "id": 12,
+        "sub": 1,
+        "name": "Convergence of Cyriss",
+        "short": "Convergence"
+    },
+    {
+        "id": 13,
+        "sub": -1,
+        "name": "Objectives"
+    },
+    {
+        "id": 14,
+        "sub": 2,
+        "name": "Grymkin",
+        "short": "Grymkin"
+    },
+    {
+        "id": 15,
+        "sub": 1,
+        "name": "Crucible Guard",
+        "short": "Crucible Guard"
+    },
+    {
+        "id": 16,
+        "sub": 3,
+        "name": "Infernals",
+        "short": "Infernal"
+    }
+]

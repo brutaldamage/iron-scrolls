@@ -1,12 +1,21 @@
 using System.Linq;
 
-namespace IronJournal.Models
+namespace IronJournal.Models.CC
 {
     public class CCInfoResponse
     {
         public string Url { get; set; }
         public string Faction { get; set; }
         public CCListInfoResponse[] Lists { get; set; }
+
+        public string Id {
+            get {
+                try {
+                    return Util.CCHelper.GetListId(new System.Uri(Url));
+                }
+                catch { return null;}
+            }
+        } 
     }
 
     public class CCListInfoResponse

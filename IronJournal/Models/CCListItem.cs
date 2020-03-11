@@ -1,6 +1,6 @@
 namespace IronJournal.Models
 { 
-    public class CCList 
+    public class CCListItem 
     {
         public string ListId { get;set;}
         public string Name { get;set;}

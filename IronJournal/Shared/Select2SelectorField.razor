@@ -1,0 +1,35 @@
+@typeparam TValue
+@inherits InputBase<TValue>
+
+<div class="form-group">
+    <label class="col-md-3 control-label" for="@Id">
+        @Label
+        @if (Required)
+        {
+            <font color="red">(*)</font>
+        }
+    </label>
+
+    <div class="col-md-6">
+        <select id="@Id" class="form-control" style="width: 100%;">
+            <option @key="null" value="null">-- Select @Label --</option>
+            @if (Datasource != null)
+                @foreach (var item in Datasource)
+                {
+                    if (item.Key == Value?.ToString())
+                    {
+                        <option @key="@item.Key" value="@item.Key" selected="selected">
+                            @((MarkupString)@item.Value)
+                        </option>
+                    }
+                    else
+                    {
+                        <option @key="@item.Key" value="@item.Key">
+                            @((MarkupString)@item.Value)
+                        </option>
+                    }
+                }
+        </select>
+    </div>
+    <Select2SelectorFieldChild Id="@Id" OnValueChanged="@OnValueChanged"/>
+</div>
