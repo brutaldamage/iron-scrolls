@@ -1,0 +1,22 @@
+@using Microsoft.AspNetCore.Components.Forms;
+@inherits InputText
+<div class="form-group" >
+    <div class="row">
+        <div class="col-md-3">
+        <label for="@InputId" class="control-label">@Label</label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <input @bind="CurrentValue" id="@InputId" class="@CssClass form-control rounded" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string InputId { get; set; }
+
+    [Parameter]
+    public string Label { get; set; }
+}

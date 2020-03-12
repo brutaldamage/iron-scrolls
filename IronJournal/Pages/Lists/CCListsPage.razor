@@ -27,12 +27,16 @@ else  if(this.ViewModel?.ConflictChamberLists != null)
     @foreach(var list in ViewModel.ConflictChamberLists)
     {
       <tr>
-        <td>@list.Model.Name</td>
-          <td>@list.ConflictChamberData.Faction</td>
-          <td>@list.ConflictChamberData.Lists[0].Caster</td>
-          <td>@list.ConflictChamberData.Lists[0].Theme</td>
-          <td>@list.ConflictChamberData.Lists[0].Points</td>
-        <td><a href="@list.ConflictChamberData.Url" target="_blank">View List</a></td>
+        <td>@list.Name</td>
+          <td>@list.Faction</td>
+          <td>@list.Caster</td>
+          <td>@list.Theme</td>
+          <td>@list.Points</td>
+        <td>
+          @if(!string.IsNullOrEmpty(list.ConflictChamberLink)) {
+          <a href="@list.ConflictChamberLink" target="_blank">View CC List</a>
+          }
+          </td>
         <td><a href="javascript:void(0)" @onclick="@(async () => await ViewModel.DeleteList(list))">Delete</a></td>
       </tr>
     }

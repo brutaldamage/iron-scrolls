@@ -9,15 +9,17 @@ using System.Threading.Tasks;
 
 namespace IronJournal.ViewModels.Games
 {
-    public class AddGamePageModel : BaseViewModel
+    public class AddGamePageModel : BaseViewModel<int>
     {
         readonly IDataService _dataService;
         readonly NavigationManager _navigation;
         private readonly IDialogs _dialogs;
-        private CCListDataModel[] lists;
+        private List<CCListItem> lists;
         private ScenarioModel[] scenarios;
         private InitiativeModel[] initiatives;
         private GameResultModel[] gameResults;
+
+        int listIndex = 0;
 
         public Dictionary<string, string> ListOptions { get; private set; }
         public string SelectedListId { get; set; }
@@ -58,13 +60,16 @@ namespace IronJournal.ViewModels.Games
 
             IsLoading = true;
 
-            this.lists = await _dataService.GetLists();
+            this.lists = (await _dataService.GetLists()).ToList();
             this.scenarios = await _dataService.GetScenarios();
             this.initiatives = await _dataService.GetInitiatives();
             this.gameResults = await _dataService.GetGameResults();
 
+            var factions = await this._dataService.GetFactions();
+            var casters = await this._dataService.GetModels(typeIds: new int[] { 2, 7, 15 });
+
             // assume only 1 caster in list, that's all that's supported right now
-            this.ListOptions = this.lists.ToDictionary(x => x.Model.ListId, x => $"{x.Model.Name} | {x.ConflictChamberData.Faction}, {x.ConflictChamberData.Lists[0].Caster}");
+            this.ListOptions = this.lists.ToDictionary(x => lists.IndexOf(x).ToString(), x => $"{x.Name} | {factions.FirstOrDefault(f => f.Id == x.FactionId)?.Name}, {casters.FirstOrDefault(c => c.Id == x.CasterId)?.Name}");
             this.ScenarioOptions = this.scenarios.ToDictionary(x => x.Id.ToString(), x => x.Name);
             this.InitiativeOptions = this.initiatives.ToDictionary(x => x.Id.ToString(), x => x.Name);
             this.GameResultOptions = this.gameResults.ToDictionary(x => x.Id.ToString(), x => x.Name);
@@ -73,6 +78,11 @@ namespace IronJournal.ViewModels.Games
 
             // var factions = await this._dataService.GetFactions();
             IsLoading = false;
+        }
+
+        public override void Prepare(int param)
+        {
+            this.listIndex = param;
         }
 
 
@@ -93,7 +103,7 @@ namespace IronJournal.ViewModels.Games
             };
 
             IsSaving = true;
-            await this._dataService.AddGame(model);
+            await this._dataService.AddGame(this.listIndex, model);
             IsSaving = false;
 
             this._navigation.NavigateTo("/games");

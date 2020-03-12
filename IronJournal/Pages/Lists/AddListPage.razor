@@ -1,0 +1,41 @@
+@page "/cc-lists/edit/{Parameter:int}"
+
+@using IronJournal.Shared;
+@using IronJournal.ViewModels.Lists;
+
+@inherits BaseComponent<int, AddListPageModel>
+@attribute [Authorize]
+
+<h1>Add List</h1>
+
+@if(ViewModel.IsLoading) 
+{
+    <div class="loader"></div>  
+}
+else 
+{
+    <EditForm Model="@ViewModel" OnValidSubmit="@ViewModel.OnSave" class="form-horizontal" role="form">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+            <StringField Label="List Name" InputId="nameInput" @bind-Value="ViewModel.Name" />
+
+            <StringField Label="Conflict Chamber Link" InputId="ccLinkInput" @bind-Value="ViewModel.ConflictChamberLink" />
+
+            <Select2SelectorField Label="Faction" Id="factionSelect"
+                @bind-Value="@ViewModel.SelectedFactionId"
+                Datasource="ViewModel.FactionOptions"
+                ValidationFor="@(() => ViewModel.SelectedFactionId)" />
+
+            <Select2SelectorField Label="Caster" Id="casterSelect"
+                @bind-Value="@ViewModel.SelectedCasterId"
+                Datasource="ViewModel.CasterOptions"
+                ValidationFor="@(() => ViewModel.SelectedCasterId)" />
+
+            <IntField Label="Point Level" InputId="pointsInput" @bind-Value="ViewModel.PointsLevel"/>
+
+            <StringField Label="Theme" InputId="themeInput" @bind-Value="ViewModel.Theme" />
+
+            <SaveCancelButtons CancelRedirect="/cc-lists" IsSaving="@ViewModel.IsSaving" />
+    </EditForm>
+}

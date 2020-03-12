@@ -1,6 +1,7 @@
 using IronJournal.Models.CC;
 using IronJournal.Services;
 using Microsoft.AspNetCore.Components;
+using IronJournal.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace IronJournal.ViewModels.Games
             try
             {
                 Console.WriteLine("Loading Games");
-                // var factions = await this._dataService.GetFactions();
+                
                 var scenarios = await this._dataService.GetScenarios();
                 var results = await this._dataService.GetGameResults();
                 var games = (await this._dataService.GetGames()).ToList();
@@ -40,7 +41,7 @@ namespace IronJournal.ViewModels.Games
                 foreach (var game in games)
                 {
                     var opponentList = await _dataService.GetConflictChamberList(game.OpponentListId);
-                    var list = await _dataService.GetConflictChamberList(game.ListId);
+                    // var list = await _dataService.GetConflictChamberList(game.ListId);
                     var index = games.IndexOf(game);
 
                     gamesItemList.Add(new GameListItemViewModel(index, list, opponentList, game.Date, results.FirstOrDefault(x => x.Id == game.GameResultId)?.Name, scenarios.FirstOrDefault(x => x.Id == game.ScenarioId)?.Name));
@@ -58,7 +59,9 @@ namespace IronJournal.ViewModels.Games
 
         public Task AddGame()
         {
-            _navigation.NavigateTo("/games/add");
+            var index = this.Games.Count;
+
+            _navigation.NavigateTo($"/games/edit{index}");
 
             return Task.CompletedTask;
         }
@@ -75,7 +78,7 @@ namespace IronJournal.ViewModels.Games
         public string OpponentFaction { get; }
         public string OpponentCaster { get; }
 
-        public GameListItemViewModel(int index, CCInfoResponse list, CCInfoResponse opponentList, DateTime date, string result, string scenario)
+        public GameListItemViewModel(int index, CCListItem list, CCInfoResponse opponentList, DateTime date, string result, string scenario)
         {
             Index = index;
             this.Date = date;

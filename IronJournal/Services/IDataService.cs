@@ -18,19 +18,19 @@ namespace IronJournal.Services
     {
         Task<Models.CC.CCInfoResponse> GetConflictChamberList(string ccid);
 
-        Task<Models.CCListDataModel[]> GetLists();
+        Task<CCListItem[]> GetLists();
 
-        Task DeleteList(CCListDataModel list);
+        Task DeleteList(int index);
 
-        Task<Models.CCListDataModel> CreateList(string name, string ccid, int index);
+        Task CreateList(int index, CCListItem listModel);
 
         Task<Models.FactionModel[]> GetFactions();
 
-        Task<Models.ModelModel[]> GetModels(int? id = null, int? factionId = null, int? typeId = null);
+        Task<Models.ModelModel[]> GetModels(int[] factionIds = null, int[] typeIds = null);
 
         Task<Models.GameModel[]> GetGames();
 
-        Task AddGame(Models.GameModel model);
+        Task AddGame(int index, Models.GameModel model);
 
         Task<Models.GameModel> GetGame(int index);
 
@@ -56,65 +56,31 @@ namespace IronJournal.Services
             _currentUser = currentUser;
         }
 
-        public async Task<Models.CCListDataModel[]> GetLists()
+        public async Task<CCListItem[]> GetLists()
         {
             var user = await this._currentUser.GetCurrentUser();
             var lists = await GetFirebaseLists(user);
 
-            var modelWrappers = new List<CCListDataModel>();
-
-            if (lists != null && lists.Length > 0)
-            {
-                foreach (var list in lists)
-                {
-                    modelWrappers.Add(await GetListDetails(list));
-                }
-            }
-
-            return modelWrappers?.ToArray();
+            return lists;
         }
 
-        public async Task DeleteList(CCListDataModel list)
+        public async Task DeleteList(int listIndx)
         {
             var user = await this._currentUser.GetCurrentUser();
-            var lists = (await GetFirebaseLists(user)).ToList();
-
-            var match = lists.FirstOrDefault(x => x.ListId == list.Model.ListId);
-
-            if (match != null)
-            {
-                var index = lists.IndexOf(match);
-
-                await DeleteFireBaseList(user, index);
-            }
+            
+            await DeleteFireBaseList(user, listIndx);
         }
 
-        public async Task<Models.CCListDataModel> CreateList(string name, string ccid, int index)
+        public async Task CreateList(int index, CCListItem list)
         {
-            var link = string.Format("https://conflictchamber.com/?{0}", ccid);
-            var newItem = new Models.CCListItem
-            {
-                Name = name,
-                ListId = ccid,
-                Url = link
-            };
-
             var user = await _currentUser.GetCurrentUser();
-            var listDetails = await GetListDetails(newItem);
-
-            if (listDetails.ConflictChamberData.Lists.Length > 1)
-            {
-                throw new Util.ValidationException("This Conflict Chamber list contains more than 1 caster. Lists with only 1 caster are currently supported.");
-            }
-
             var fbClient = GetFirebaseClient();
-            await fbClient.Child("users")
-                .Child(user.Uid)
-                .Child("cc_lists")
-                .Child(index.ToString())
-                .PutAsync(newItem);
 
-            return listDetails;
+            await fbClient
+                .Child("cc_lists")
+                .Child(user.Uid)
+                .Child(index.ToString())
+                .PutAsync(list);
         }
 
         public async Task<Models.FactionModel[]> GetFactions()
@@ -124,27 +90,20 @@ namespace IronJournal.Services
             return JsonConvert.DeserializeObject<FactionModel[]>(json);
         }
 
-        public async Task<Models.ModelModel[]> GetModels(int? id = null, int? factionId = null, int? typeId = null)
+        public async Task<Models.ModelModel[]> GetModels(int[] factionIds = null, int[] typeIds = null)
         {
-            var json = await GetHttpClient().GetStringAsync("/data/factions.json");
+            var json = await GetHttpClient().GetStringAsync("/data/models.json");
             var models = JsonConvert.DeserializeObject<ModelModel[]>(json);
 
-            if (id.HasValue)
-            {
-                return models.Where(x => x.Id == id.Value).ToArray();
-            }
-            else
-            {
-                IEnumerable<ModelModel> filter = models;
+            IEnumerable<Models.ModelModel> filter = models;
 
-                if (factionId.HasValue)
-                    filter = filter.Where(x => x.FactionId == factionId.Value);
+            if (factionIds != null && factionIds.Length > 0)
+                filter = models.Where(x => factionIds.Contains(x.FactionId));
 
-                if (typeId.HasValue)
-                    filter = filter.Where(x => x.ModelType == typeId.Value);
+            if (typeIds != null && typeIds.Length > 0)
+                filter = models.Where(x => typeIds.Contains(x.ModelTypeId));
 
-                return filter.ToArray();
-            }
+            return filter.ToArray();
         }
 
         public async Task<Models.GameModel[]> GetGames()
@@ -152,31 +111,21 @@ namespace IronJournal.Services
             var user = await _currentUser.GetCurrentUser();
             var firebaseClient = GetFirebaseClient();
             var games = await firebaseClient
-                .Child("users")
-                .Child(user.Uid)
                 .Child("games")
+                .Child(user.Uid)
                 .OnceSingleAsync<Models.GameModel[]>();
 
             return games ?? new GameModel[0];
         }
 
-        public async Task AddGame(Models.GameModel model)
+        public async Task AddGame(int index, Models.GameModel model)
         {
             var user = await _currentUser.GetCurrentUser();
 
-            // make sure games exists:
-            var games = await GetGames();
-            int index = 0;
-            if (games != null)
-            {
-                index = games.Length;
-            }
-
             var firebaseClient = GetFirebaseClient();
             await firebaseClient
-                .Child("users")
-                .Child(user.Uid)
                 .Child("games")
+                .Child(user.Uid)
                 .Child(index.ToString())
                 .PutAsync(model);
 
@@ -189,9 +138,8 @@ namespace IronJournal.Services
 
             var firebaseClient = GetFirebaseClient();
             return await firebaseClient
-                .Child("users")
-                .Child(user.Uid)
                 .Child("games")
+                .Child(user.Uid)
                 .Child(index.ToString())
                 .OnceSingleAsync<GameModel>();
         }
@@ -271,9 +219,8 @@ namespace IronJournal.Services
         {
             var firebaseClient = GetFirebaseClient();
             var lists = await firebaseClient
-                .Child("users")
-                .Child(user.Uid)
                 .Child("cc_lists")
+                .Child(user.Uid)
                 .OnceSingleAsync<Models.CCListItem[]>();
 
             return lists;
@@ -282,11 +229,10 @@ namespace IronJournal.Services
         private async Task DeleteFireBaseList(UserModel user, int index)
         {
             var fbClient = GetFirebaseClient();
-            await fbClient.Child("users")
-                                    .Child(user.Uid)
-                                    .Child("cc_lists")
-                                    .Child(index.ToString())
-                                    .DeleteAsync();
+            await fbClient.Child("cc_lists")
+                    .Child(user.Uid)
+                    .Child(index.ToString())
+                    .DeleteAsync();
         }
 
         FirebaseClient GetFirebaseClient()

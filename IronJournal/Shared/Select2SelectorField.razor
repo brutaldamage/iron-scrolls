@@ -2,6 +2,7 @@
 @inherits InputBase<TValue>
 
 <div class="form-group">
+    <div class="row">
     <label class="col-md-3 control-label" for="@Id">
         @Label
         @if (Required)
@@ -9,7 +10,9 @@
             <font color="red">(*)</font>
         }
     </label>
+    </div>
 
+<div class="row">
     <div class="col-md-6">
         <select id="@Id" class="form-control" style="width: 100%;">
             <option @key="null" value="null">-- Select @Label --</option>
@@ -30,6 +33,7 @@
                     }
                 }
         </select>
+    </div>
     </div>
     <Select2SelectorFieldChild Id="@Id" OnValueChanged="@OnValueChanged"/>
 </div>

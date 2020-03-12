@@ -7,6 +7,14 @@ namespace IronJournal.Util
 {
     public class CCHelper
     {
+        public static string GetListId(string link)
+        {
+            if (Uri.TryCreate(link, UriKind.RelativeOrAbsolute, out Uri uri))
+                return GetListId(uri);
+
+            return null;
+        }
+
         public static string GetListId(Uri uri)
         {
             try

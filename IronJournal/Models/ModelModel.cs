@@ -9,9 +9,11 @@ namespace IronJournal.Models
 
         public string Name { get; set; }
 
+        public string Alias { get; set;}
+
         public string Keyword { get; set;}
 
-        public int ModelType { get; set;}
+        public int ModelTypeId { get; set;}
 
         public int FactionId  { get; set;}
     }
